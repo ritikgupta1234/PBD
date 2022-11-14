@@ -4,6 +4,7 @@ require("./config/database").connect()  //requiring the db and calling connect f
 const bcrypt = require("bcryptjs")
 const express = require("express")
 const User = require("./model/user")
+const jwt = require("jsonwebtoken")
 const app = express()
 
 app.use(express.json())   //for req.body using inbuilt body parser and this is an middleware it will do it by themselve
@@ -14,7 +15,8 @@ app.get("/",(req,res)=>{
 
 //step-1 get all info
 app.post("/register",async(req,res)=>{
-    const {firstname,lastname,email,password} = req.body
+    try {  //use try catch since it is a promise as are using await everywhere and since we are not using promise so use try and catch it is a safe way
+        const {firstname,lastname,email,password} = req.body
     //to apply check we can use the mongoose also but this is very simple so we will be using our own validations for this
 
     //step-2 check mandatory fields
@@ -37,6 +39,23 @@ app.post("/register",async(req,res)=>{
         password:myEncPassword
     })
     
+    //step-5 Token creation
+    const token = jwt.sign(
+        {user_id:user._id, email},  //here we are accessing the unique object id that mongoose has assigned to the user
+        process.env.SECRET_KEY,
+        {
+            expiresIn:"2h"
+        }
+    )
+    user.token=token
+    //update or not in the database is your choice
+    
+    res.status(201).json(user)
+    } catch (error) {
+        console.log(error)
+    }
+})
+    
     //both the above method and below method both are fine you can use anyone while creating
     // User.create({
     //     firstname,
@@ -51,7 +70,6 @@ app.post("/register",async(req,res)=>{
     //     process.exit(1)
     // })
     
-})
 
 
 module.exports = app
