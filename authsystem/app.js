@@ -50,26 +50,78 @@ app.post("/register",async(req,res)=>{
     user.token=token
     //update or not in the database is your choice
     
+    //  handle password sistuation
+    user.password=undefined  //because we don't want to return the password in the cookie
+    //and this means whatever you have saved and giving me back in that i am setting one prop as undefined 
+    //it will not change in the database
+
     res.status(201).json(user)
     } catch (error) {
         console.log(error)
     }
 })
-    
-    //both the above method and below method both are fine you can use anyone while creating
-    // User.create({
-    //     firstname,
-    //     lastname,
-    //     email:email.toLowerCase(),
-    //     password:myEncPassword
-    // })
-    // .then(console.log(`Created successfully`))
-    // .catch(error =>{
-    //     console.log(`Can't create the user`)
-    //     console.log(error)
-    //     process.exit(1)
-    // })
-    
+
+app.post("/login",async(req,res)=>{
+    try {
+        const {email,password} = req.body
+        if(!(email && password)){
+            res.status(400).send("Field is missing")
+        }
+        const user = await User.findOne({email})
+
+        // if(!user){
+        //     res.status(400).send("You are not registered in our app")
+        // }
+        if(user && (await bcrypt.compare(password,user.password))){
+            const token = jwt.sign(
+                {user_id:user._id,email},
+                process.env.SECRET_KEY,
+                {
+                    expiresIn:"2h"
+                }
+            )
+            user.token=token
+            user.password=undefined
+            res.status(200).json(user)
+        }
+        //you can change the flow by giving the proper message to the user that they are registered or not, fields are filled or not, password is 
+        //correct or not and so on
+        res.status(400).send("email or password is incorrect")
+
+
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+
 
 
 module.exports = app
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//both the above method and below method both are fine you can use anyone while creating
+// User.create({
+//     firstname,
+//     lastname,
+//     email:email.toLowerCase(),
+//     password:myEncPassword
+// })
+// .then(console.log(`Created successfully`))
+// .catch(error =>{
+//     console.log(`Can't create the user`)
+//     console.log(error)
+//     process.exit(1)
+// })
