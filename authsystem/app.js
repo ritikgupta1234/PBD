@@ -7,9 +7,9 @@ const User = require("./model/user")
 const auth = require("./middleware/auth")
 const jwt = require("jsonwebtoken")
 const app = express()
-
+const cookieParser = require("cookie-parser")
 app.use(express.json())   //for req.body using inbuilt body parser and this is an middleware it will do it by themselve
-
+app.use(cookieParser())
 app.get("/",(req,res)=>{
     res.send("<h1>Hello from auth system - Ritik</h1>")
 })
@@ -83,7 +83,21 @@ app.post("/login",async(req,res)=>{
             )
             user.token=token
             user.password=undefined
-            res.status(200).json(user)
+            // res.status(200).json(user)
+            // if you want to use cookies
+            const options={    //two prop expiration date and readable by backend only
+                expires:new Date(  //multiple formats available this is one of them
+                    Date.now()+3*24*60*60*1000
+                    ),
+                httpOnly:true,
+            }
+            //sending cookie
+            //name of cookie "token", value of cookie-token and options also has to be passed
+            res.status(200).cookie("token",token,options).json({
+                success:true,  //json response if some cannot handle this cookie
+                token,
+                user
+            })
         }
         //you can change the flow by giving the proper message to the user that they are registered or not, fields are filled or not, password is 
         //correct or not and so on
