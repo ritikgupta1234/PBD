@@ -4,6 +4,7 @@ require("./config/database").connect()  //requiring the db and calling connect f
 const bcrypt = require("bcryptjs")
 const express = require("express")
 const User = require("./model/user")
+const auth = require("./middleware/auth")
 const jwt = require("jsonwebtoken")
 const app = express()
 
@@ -95,7 +96,9 @@ app.post("/login",async(req,res)=>{
     }
 })
 
-
+app.get("/dashboard",auth,(req,res)=>{   //just add the auth in the middle 
+    res.send("Welcome to secret information")
+})
 
 module.exports = app
 
