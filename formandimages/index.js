@@ -7,8 +7,12 @@ app.set("view engine","ejs")
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.get("/myget",(req,res)=>{
-    console.log(req.body)
-    res.send(req.body)
+    //postman - {name:ritik}  website - {}
+    // console.log(req.body)
+    // res.send(req.body)
+    //postman - {} website - {name:ritik}
+    console.log(req.query)
+    res.send(req.query)
 })
 
 app.get("/mygetform",(req,res)=>{
