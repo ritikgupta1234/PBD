@@ -35,7 +35,9 @@ app.post("/mypost",async(req,res)=>{
     let imageArray=[]
 
     //##### multiple files
-    if(req.files){
+    const checkingNoofimage = Array.isArray(req.files.samplefile)
+    // console.log(req.files.samplefile.length)
+    if(req.files && checkingNoofimage){
         for (let index = 0; index < req.files.samplefile.length; index++) {
             let result=await cloudinary.uploader.upload(req.files.samplefile[index].tempFilePath,{
                 folder:"users"
@@ -46,12 +48,14 @@ app.post("/mypost",async(req,res)=>{
             })
         }
     }
+    if(req.files && !checkingNoofimage){
+        //##### single file
+        let file=req.files.samplefile
+        result=await cloudinary.uploader.upload(file.tempFilePath,{
+            folder:"users"
+        })
 
-    //##### single file
-    // let file=req.files.samplefile
-    // result=await cloudinary.uploader.upload(file.tempFilePath,{
-    //     folder:"users"
-    // })
+    }
     details={
         firstname:req.body.firstname,
         lastname:req.body.lastname,
