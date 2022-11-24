@@ -7,8 +7,6 @@ const cloudinary = require("cloudinary")
 const mailHelper = require("../utils/emailHelper")
 const crypto = require("crypto")
 
-
-
 exports.signup = BigPromise(async(req,res,next)=>{
     // let result;
     if(!req.files){
@@ -143,3 +141,55 @@ exports.getLoggedInUserDetails = BigPromise(async(req,res,next)=>{
         user,
     })
 })
+
+exports.changePassword = BigPromise(async(req,res,next)=>{
+    const userId = req.user.id
+    const user = await User.findById(userId).select("+password")
+    const isCorrectOldPassword = await user.isvalidatedPassword(req.body.oldPassword)
+    if(!isCorrectOldPassword){
+        return next(new CustomError("old password is incorrect",400))
+    }
+    user.password = req.body.newPassword
+    await user.save()
+    cookieToken(user,res)
+})
+
+exports.updateUserDetails = BigPromise(async(req,res,next)=>{
+    if(!req.body.name || !req.body.email){
+        return next(new CustomError("Please enter name and email",400))
+    }
+    const newData = {
+        name:req.body.name,
+        email:req.body.email,
+        //add other fields whatever you want
+    }
+    if(req.files && req.files.photo !==""){
+        const user = await User.findById(req.user.id)
+        //storing the image id in a var
+        const imageId = user.photo.id
+        //deleting photo in the cloudinary
+        const resp = await cloudinary.v2.uploader.destroy(imageId)
+        // upload the new photo 
+        let file = req.files.photo
+        const result = await cloudinary.v2.uploader.upload(file.tempFilePath,{
+            folder:"users",
+            width:150,
+            crop:"scale"
+        })
+        newData.photo = {
+            id:result.public_id,
+            secure_url:result.secure_url
+        }
+    }
+    const user = await User.findByIdAndUpdate(req.user.id,newData,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false, //always turn this flag as false
+
+    })
+    res.status(200).json({
+        success:true,
+        user
+    })
+})
+
