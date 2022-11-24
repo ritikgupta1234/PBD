@@ -6,7 +6,8 @@ const fileUpload = require("express-fileupload")
 const cloudinary = require("cloudinary")
 const mailHelper = require("../utils/emailHelper")
 const crypto = require("crypto")
-const user = require("../models/user")
+
+
 
 exports.signup = BigPromise(async(req,res,next)=>{
     // let result;
@@ -133,4 +134,12 @@ exports.passwordreset = BigPromise(async(req,res,next)=>{
 
     //send json response or send token
     cookieToken(user,res)
+})
+
+exports.getLoggedInUserDetails = BigPromise(async(req,res,next)=>{
+    const user = await User.findById(req.user.id)
+    res.status(200).json({
+        success:true,
+        user,
+    })
 })
