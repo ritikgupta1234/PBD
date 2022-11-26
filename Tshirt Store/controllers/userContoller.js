@@ -193,3 +193,59 @@ exports.updateUserDetails = BigPromise(async(req,res,next)=>{
     })
 })
 
+exports.adminAllUser = BigPromise(async(req,res,next)=>{
+   const users = await User.find({})
+   
+   res.status(200).json({
+    success:true,
+    users
+   })
+})
+
+exports.admingetOneUser = BigPromise(async(req,res,next)=>{
+    const user = await User.findById(req.params.id)
+    if(!user){
+        next(new CustomError("No user found",400))
+    }
+    res.status(200).json({
+        success:true,
+        user
+    })
+ })
+
+exports.adminupdateOneUserDetails = BigPromise(async(req,res,next)=>{
+    const newData = {
+        name:req.body.name,
+        email:req.body.eamil,
+        role:req.body.role
+    }
+    const user = await User.findByIdAndUpdate(req.params.id,newData,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false,
+    })
+})
+
+exports.adminDeleteOneUser = BigPromise(async(req,res,next)=>{
+    const user = await User.findById(req.params.id)
+    if(!user){
+        return next(new CustomError("no user exists",400))
+    }
+    const imageId = user.photo.id
+    await cloudinary.v2.uploader.destroy(imageId)
+    await user.remove()
+    res.status(200).json({
+        success:true,
+    })
+})
+
+
+exports.managerAllUser = BigPromise(async(req,res,next)=>{
+   const users = await User.find({role:"user"})
+   
+   res.status(200).json({
+    success:true,
+    users
+   })
+})
+
