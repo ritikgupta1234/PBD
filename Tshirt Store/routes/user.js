@@ -5,7 +5,6 @@ const {signup,login,logout,forgotPassword,passwordreset,getLoggedInUserDetails,c
     adminAllUser,managerAllUser,admingetOneUser,adminupdateOneUserDetails,adminDeleteOneUser
 } = require("../controllers/userContoller")
 const { isLoggedIn,customRole, } = require("../middlewares/user")
-const { update } = require("../models/user")
 
 router.route("/signup").post(signup)
 router.route("/login").post(login)
@@ -18,7 +17,7 @@ router.route("/userdashboard/update").post(isLoggedIn,updateUserDetails)
 
 //admin only routes
 router.route("/admin/users").get(isLoggedIn,customRole("admin"),adminAllUser)
-router.route("/admin/users/:id")
+router.route("/admin/user/:id")
 .get(isLoggedIn,customRole("admin"),admingetOneUser)
 .put(isLoggedIn,customRole("admin"),adminupdateOneUserDetails)
 .delete(isLoggedIn,customRole("admin"),adminDeleteOneUser)

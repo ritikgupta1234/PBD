@@ -20,7 +20,7 @@ exports.isLoggedIn = BigPromise(async(req,res,next)=>{
 exports.customRole = (...roles) =>{ //this is industry level code and it is done in this way by spreading the string and converting
     //it into array as performing operation on array is more easy compared to string
     return (req,res,next) =>{
-        if(!roles.includes(req.user.roles)){
+        if(!roles.includes(req.user.role)){
             return next(new CustomError("You are not allowed for this resourse",403))
         }
         next()
